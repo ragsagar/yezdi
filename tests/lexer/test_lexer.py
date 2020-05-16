@@ -8,7 +8,7 @@ class LexerTestCase(TestCase):
     def test_next_token(self):
         input_string = """title API v1
         
-User->Backend:
+User->Backend-1:
 Backend->Elastic Search:
 Elastic Search-->Backend:
 Backend-->User:
@@ -18,7 +18,7 @@ Backend-->User:
             Token(TokenType.IDENTIFIER, "API v1"),
             Token(TokenType.IDENTIFIER, "User"),
             Token(TokenType.SOLID_LINE, "->"),
-            Token(TokenType.IDENTIFIER, "Backend"),
+            Token(TokenType.IDENTIFIER, "Backend-1"),
             Token(TokenType.COLON, ":"),
             Token(TokenType.IDENTIFIER, "Backend"),
             Token(TokenType.SOLID_LINE, "->"),

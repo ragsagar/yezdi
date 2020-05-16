@@ -72,6 +72,7 @@ class Lexer:
                 next_next_char = self.peek_character(2)
                 if next_char == ">" or next_next_char == ">":
                     break
+                self._read_character()
             else:
                 break
         return token_type, self.input_string[start_position : self.current_position]
