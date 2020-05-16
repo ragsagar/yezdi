@@ -17,25 +17,19 @@ Backend-->User:
             Token(TokenType.TITLE, "title"),
             Token(TokenType.IDENTIFIER, "API v1"),
             Token(TokenType.IDENTIFIER, "User"),
-            Token(TokenType.HYPHEN, "-"),
-            Token(TokenType.GREATER_THAN, ">"),
+            Token(TokenType.SOLID_LINE, "->"),
             Token(TokenType.IDENTIFIER, "Backend"),
             Token(TokenType.COLON, ":"),
             Token(TokenType.IDENTIFIER, "Backend"),
-            Token(TokenType.HYPHEN, "-"),
-            Token(TokenType.GREATER_THAN, ">"),
+            Token(TokenType.SOLID_LINE, "->"),
             Token(TokenType.IDENTIFIER, "Elastic Search"),
             Token(TokenType.COLON, ":"),
             Token(TokenType.IDENTIFIER, "Elastic Search"),
-            Token(TokenType.HYPHEN, "-"),
-            Token(TokenType.HYPHEN, "-"),
-            Token(TokenType.GREATER_THAN, ">"),
+            Token(TokenType.DASHED_LINE, "-->"),
             Token(TokenType.IDENTIFIER, "Backend"),
             Token(TokenType.COLON, ":"),
             Token(TokenType.IDENTIFIER, "Backend"),
-            Token(TokenType.HYPHEN, "-"),
-            Token(TokenType.HYPHEN, "-"),
-            Token(TokenType.GREATER_THAN, ">"),
+            Token(TokenType.DASHED_LINE, "-->"),
             Token(TokenType.IDENTIFIER, "User"),
             Token(TokenType.COLON, ":"),
             Token(TokenType.EOF, ""),
@@ -45,4 +39,5 @@ Backend-->User:
         # then
         for expected_token in expected_tokens:
             result = lexer.next_token()
+            print(expected_token, result)
             assert expected_token == result

@@ -9,14 +9,17 @@ class TokenType(Enum):
     IDENTIFIER = "IDENTIFIER"
     LPAREN = "LPAREN"
     RPAREN = "RPAREN"
-    HYPHEN = "HYPHEN"
-    GREATER_THAN = "GREATER_THAN"
-    LESS_THAN = "LESS_THAN"
     EOF = "EOF"
     ILLEGAL = "ILLEGAL"
 
 
 class Token:
+    keyword_map = {
+        "title": TokenType.TITLE,
+        "->": TokenType.SOLID_LINE,
+        "-->": TokenType.DASHED_LINE,
+    }
+
     def __init__(self, token_type, literal):
         self.type = token_type
         self.literal = literal
