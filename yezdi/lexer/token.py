@@ -11,6 +11,7 @@ class TokenType(Enum):
     RPAREN = "RPAREN"
     EOF = "EOF"
     ILLEGAL = "ILLEGAL"
+    NEWLINE = "NEWLINE"
 
 
 class Token:

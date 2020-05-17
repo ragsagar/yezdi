@@ -15,6 +15,7 @@ class Lexer:
             "(": partial(self._create_token, TokenType.LPAREN),
             ")": partial(self._create_token, TokenType.RPAREN),
             "": partial(self._create_token, TokenType.EOF),
+            "\n": partial(self._create_token, TokenType.NEWLINE),
             "-": self._handle_hyphen,
         }
         self._read_character()
@@ -43,7 +44,7 @@ class Lexer:
             return self.input_string[position]
 
     def skip_whitespace(self):
-        while self.current_char.isspace():
+        while self.current_char.isspace() and self.current_char != "\n":
             self._read_character()
 
     def _read_default(self, current_char):
