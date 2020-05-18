@@ -2,6 +2,7 @@ import unittest
 
 from yezdi.lexer import Lexer
 from yezdi.lexer.token import TokenType
+from yezdi.parser.ast import TitleStatement, Line
 from yezdi.parser.parser import Parser
 
 
@@ -30,6 +31,18 @@ class ParserTestCase(unittest.TestCase):
         assert statement.name == "User"
         assert len(statement.lines) == 1
         line = statement.lines[0]
+        assert isinstance(line, Line)
         assert line.type == TokenType.DASHED_LINE
         assert line.target.name == "Backend"
         assert line.info == "request"
+
+    def test_title_statement(self):
+        input_string = "title API v1"
+        lexer = Lexer(input_string)
+        parser = Parser(lexer)
+        program = parser.parse_program()
+        assert len(program.statements) == 1
+        statement = program.statements[0]
+        assert isinstance(statement, TitleStatement)
+        self.assertIsInstance(statement, TitleStatement)
+        assert statement.value == "API v1"

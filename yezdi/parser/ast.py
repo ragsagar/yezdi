@@ -15,6 +15,9 @@ class Program:
 class Statement:
     pass
 
+class TitleStatement:
+    def __init__(self, value):
+        self.value = value
 
 class Participant:
     def __init__(self, name):

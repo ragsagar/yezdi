@@ -1,7 +1,7 @@
 import pytest
 
 from yezdi.lexer.token import TokenType
-from yezdi.parser.ast import Program, Statement, Participant, Line
+from yezdi.parser.ast import Program, Statement, Participant, Line, TitleStatement
 
 
 class Parser:
@@ -29,6 +29,8 @@ class Parser:
     def parse_statement(self):
         if self.current_token.type == TokenType.IDENTIFIER:
             return self.parse_participant()
+        elif self.current_token.type == TokenType.TITLE:
+            return self.parse_title()
 
     def parse_participant(self):
         participant_literal = self.current_token.literal
@@ -67,6 +69,11 @@ class Parser:
         else:
             return False
 
+    def parse_title(self):
+        if not self.expect_peek(TokenType.IDENTIFIER):
+            return None
+        title = TitleStatement(self.current_token.literal)
+        return title
 
 class ParserError(Exception):
     pass
