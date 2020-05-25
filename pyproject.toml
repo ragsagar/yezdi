@@ -8,6 +8,7 @@ authors = ["Rag Sagar <ragsagar@gmail.com>"]
 python = "^3.6"
 pytest = "^5.4.2"
 ipython = "^7.14.0"
+matplotlib = "^3.2.1"
 
 [tool.poetry.dev-dependencies]
 
