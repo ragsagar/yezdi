@@ -46,3 +46,28 @@ Backend-->User:
             result = lexer.next_token()
             print(expected_token, result)
             assert expected_token == result
+
+    def test_lexing_multiline(self):
+        input_string = """User->Backend:request
+        Backend->AuthService:authrequest"""
+        expected_tokens = [
+            Token(TokenType.IDENTIFIER, "User"),
+            Token(TokenType.SOLID_LINE, "->"),
+            Token(TokenType.IDENTIFIER, "Backend"),
+            Token(TokenType.COLON, ":"),
+            Token(TokenType.IDENTIFIER, "request"),
+            Token(TokenType.NEWLINE, "\n"),
+            Token(TokenType.IDENTIFIER, "Backend"),
+            Token(TokenType.SOLID_LINE, "->"),
+            Token(TokenType.IDENTIFIER, "AuthService"),
+            Token(TokenType.COLON, ":"),
+            Token(TokenType.IDENTIFIER, "authrequest"),
+            Token(TokenType.EOF, ""),
+        ]
+        # when
+        lexer = Lexer(input_string)
+        # then
+        for expected_token in expected_tokens:
+            result = lexer.next_token()
+            print(expected_token, result)
+            assert expected_token == result
