@@ -1,9 +1,14 @@
 import matplotlib.pyplot as plt
 
+from yezdi.parser.ast import LineType
+
 
 class MPLEngine:
     def __init__(self):
-        self.ax = plt.axes()
+        # self.figure = plt.figure()
+        # self.ax = plt.axes()
+        self.figure, self.ax = plt.subplots(1)
+        self.ax.set_label("Title")
 
     def get_drawing_object(self):
         return self.ax
@@ -16,7 +21,8 @@ class MPLEngine:
         x, y = coords
         self.ax.text(x, y, text, ha=ha, color=color)
 
-    def add_arrow(self, start_coords, end_coords, head_type="filled"):
+    def add_arrow(self, start_coords, end_coords, line_type=LineType.SOLID):
+        ls = "--" if line_type == LineType.DASHED else "-"
         sx, sy = start_coords
         ex, ey = end_coords
         dx, dy = ex - sx, ey - sy
@@ -27,7 +33,8 @@ class MPLEngine:
             fc="black",
             ec="black",
             head_width=2.5,
-            length_includes_head=True
+            length_includes_head=True,
+            ls=ls,
         )
 
     def add_dotted_line(self, start_coords, end_coords, width=1):
@@ -37,7 +44,9 @@ class MPLEngine:
 
     def prepare(self):
         plt.axis("scaled")
-        # self.ax.set_aspect("equal", adjustable="box", anchor="C")
+        self.ax.set_aspect("equal", adjustable="box", anchor="C")
 
     def show(self):
-        plt.show()
+        self.figure.waitforbuttonpress(timeout=10)
+        self.figure.show()
+        # plt.show()

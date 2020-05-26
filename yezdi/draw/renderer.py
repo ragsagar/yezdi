@@ -1,7 +1,7 @@
 import pytest
 
 from yezdi.draw.mpl_engine import MPLEngine
-from yezdi.parser.ast import Participant, Title, LineStatement
+from yezdi.parser.ast import Participant, Title, LineStatement, LineType
 
 PARTICIPANT_WIDTH = 40
 PARTICIPANT_HEIGHT = 20
@@ -82,13 +82,15 @@ class DrawingRenderer:
         tx, ty = self.get_coords_for_participant(line.target)
         tx += PARTICIPANT_WIDTH / 2.0
         ty -= FLOW_LINE_GAP * self.arrow_count
-        self.engine.add_arrow((sx, sy), (tx, ty))
-        lx = sx + ((tx - sx) / 2.0)
-        ly = sy + ((ty - sy) / 2.0) + 1
-        self.engine.add_text(line.info, (lx, ly), ha="center")
+        self.engine.add_arrow((sx, sy), (tx, ty), line_type=line.type)
+        if line.info:
+            lx = sx + ((tx - sx) / 2.0)
+            ly = sy + ((ty - sy) / 2.0) + 1
+            self.engine.add_text(line.info, (lx, ly), ha="center")
 
-    def interpret_title(self, titleobj):
-        pass
+    def interpret_title(self, title_statement):
+        coords = (300, 100)
+        self.engine.add_text(title_statement, coords)
 
     def get_rendering_object(self):
         return self.engine.get_drawing_object()

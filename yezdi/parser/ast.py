@@ -40,10 +40,10 @@ class LineType(Enum):
 
 
 class LineStatement:
-    def __init__(self, token_type):
+    def __init__(self, token_type, source=None, target=None):
         self.type = LineType.for_token_type(token_type)
-        self.source = None
-        self.target = None
+        self.source = source
+        self.target = target
         self.info = None
 
     def set_source(self, source):
