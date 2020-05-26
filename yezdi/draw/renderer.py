@@ -1,7 +1,7 @@
 import pytest
 
 from yezdi.draw.mpl_engine import MPLEngine
-from yezdi.parser.ast import Participant, Title
+from yezdi.parser.ast import Participant, Title, LineStatement
 
 PARTICIPANT_WIDTH = 40
 PARTICIPANT_HEIGHT = 20
@@ -14,39 +14,39 @@ FLOW_LINE_GAP = 15
 
 
 class DrawingRenderer:
-    def __init__(self):
-        # self.statements = statements
+    def __init__(self, statements):
+        self.statements = statements
         self.engine = MPLEngine()
         self.origin = START_COORDS
         self.participant_coords = {}
         self.drawn_participants = set()
         self.arrow_count = 0
 
-    def interpret(self, program):
-        for statement in program.statements:
+    def interpret(self):
+        for statement in self.statements:
             self.interpret_statement(statement)
 
     def interpret_statement(self, statement):
         # TODO interpret others
-        if isinstance(statement.root, Participant):
-            self.interpret_participant(statement.root)
+        if isinstance(statement.root, LineStatement):
+            self.interpret_line(statement.root)
         elif isinstance(statement.root, Title):
             self.interpret_title(statement.root)
 
-    def interpret_participant(self, participant):
+    def interpret_line(self, line):
+        self.draw_participant(line.source)
+        self.draw_participant(line.target)
+        self.draw_arrow(line)
+
+    def draw_participant(self, participant):
         if participant not in self.drawn_participants:
             coords = self.get_coords_for_participant(participant)
-            print(participant.name, coords)
             self.engine.add_rectangle(
                 coords, PARTICIPANT_WIDTH, PARTICIPANT_HEIGHT,
             )
             self.draw_down_stroke(coords)
             self.add_participant_label(participant.name, coords)
             self.drawn_participants.add(participant)
-        current_coords = self.get_coords_for_participant(participant)
-        target_coords = self.get_coords_for_participant(participant.line.target)
-        print(participant.name, current_coords, target_coords)
-        self.draw_arrow(current_coords, target_coords)
 
     def get_coords_for_participant(self, participant):
         participant_coords = self.participant_coords.get(participant.name)
@@ -74,15 +74,18 @@ class DrawingRenderer:
         ty = y + (PARTICIPANT_HEIGHT / 2.0)
         self.engine.add_text(label, (tx, ty))
 
-    def draw_arrow(self, source_coords, target_coords):
+    def draw_arrow(self, line):
         self.arrow_count += 1
-        sx, sy = source_coords
+        sx, sy = self.get_coords_for_participant(line.source)
         sx += PARTICIPANT_WIDTH / 2.0
         sy -= FLOW_LINE_GAP * self.arrow_count
-        tx, ty = target_coords
+        tx, ty = self.get_coords_for_participant(line.target)
         tx += PARTICIPANT_WIDTH / 2.0
         ty -= FLOW_LINE_GAP * self.arrow_count
         self.engine.add_arrow((sx, sy), (tx, ty))
+        lx = sx + ((tx - sx) / 2.0)
+        ly = sy + ((ty - sy) / 2.0) + 1
+        self.engine.add_text(line.info, (lx, ly), ha="center")
 
     def interpret_title(self, titleobj):
         pass

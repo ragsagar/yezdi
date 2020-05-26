@@ -1,7 +1,5 @@
-import pytest
-
 from yezdi.lexer.token import TokenType
-from yezdi.parser.ast import Program, Statement, Participant, Line, TitleStatement
+from yezdi.parser.ast import Program, Statement, Participant, Title, LineStatement
 
 
 class Parser:
@@ -18,7 +16,6 @@ class Parser:
 
     def parse_program(self):
         program = Program()
-        # pytest.set_trace()
         while self.current_token.type != TokenType.EOF:
             statement = self.parse_statement()
             if statement:
@@ -28,22 +25,24 @@ class Parser:
 
     def parse_statement(self):
         if self.current_token.type == TokenType.IDENTIFIER:
-            return self.parse_participant()
+            return self.parse_line_statement()
         elif self.current_token.type == TokenType.TITLE:
             return self.parse_title()
+        return None
 
-    def parse_participant(self):
+    def parse_line_statement(self):
         participant_literal = self.current_token.literal
 
         if not self.peek_token.type in [TokenType.SOLID_LINE, TokenType.DASHED_LINE]:
             return None
         self.next_token()
 
-        participant = self.get_participant(participant_literal)
-        line = Line(self.current_token.type)
+        participant = Participant(participant_literal)
+        line = LineStatement(self.current_token.type)
+        line.set_source(participant)
         if not self.expect_peek(TokenType.IDENTIFIER):
             return None
-        target = self.get_participant(self.current_token.literal)
+        target = Participant(self.current_token.literal)
         line.set_target(target)
         if not self.expect_peek(TokenType.COLON):
             return None
@@ -51,8 +50,8 @@ class Parser:
             line.set_info(self.current_token.literal)
         if self.peek_token.type not in [TokenType.NEWLINE, TokenType.EOF]:
             return None
-        participant.add_line(line)
-        return participant
+        statement = Statement(line)
+        return statement
 
     def get_participant(self, value):
         if value in self.participants:
@@ -72,8 +71,9 @@ class Parser:
     def parse_title(self):
         if not self.expect_peek(TokenType.IDENTIFIER):
             return None
-        title = TitleStatement(self.current_token.literal)
-        return title
+        title = Title(self.current_token.literal)
+        return Statement(title)
+
 
 class ParserError(Exception):
     pass
