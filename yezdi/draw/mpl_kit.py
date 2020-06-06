@@ -24,8 +24,8 @@ class MPLKit(AbstractDrawingKit):
     def create_rectangle(self, origin, width, height):
         return MPLRectangle(self.ax, origin, width, height)
 
-    def create_actor(self, origin, width, height, line_height):
-        return MPLActor(self.ax, origin, width, height, line_height)
+    def create_actor(self, coords, width, height, line_height):
+        return MPLActor(self.ax, coords, width, height, line_height)
 
     def create_solid_arrow(self, from_point, to_point):
         return MPLSolidArrow(self.ax, from_point, to_point)
@@ -58,20 +58,29 @@ class MPLRectangle(AbstractRectangle):
 
 
 class MPLActor(AbstractActor):
-    def __init__(self, axes, origin, width, height, line_height):
-        super().__init__(origin, width, height)
+    def __init__(self, axes, coords, width, height, line_height):
         self.ax = axes
+        self.coords = coords
+        self.height = height
+        self.width = width
+        self.label = None
         self.line_height = line_height
-        self.rectangle = plt.Rectangle(origin, width, height, ec="black", fc="white")
+        self.draw_rectangle()
+
+    def set_label(self, label):
+        self.label = label
+        x, y = self.get_label_coords()
+        self.text_widget = self.ax.text(x, y, label, ha="center", color="black")
+
+    def draw_rectangle(self):
+        self.rectangle = plt.Rectangle(
+            self.coords, self.width, self.height, ec="black", fc="white"
+        )
         self.ax.add_patch(self.rectangle)
         self.draw_actor_line()
 
-    def set_label(self, label):
-        x, y = self.get_label_coords()
-        self.ax.text(x, y, label, ha="center", color="black")
-
     def get_label_coords(self):
-        x, y = self.origin
+        x, y = self.coords
         tx = x + (self.width / 2.0)
         ty = y + (self.height / 2.0)
         return tx, ty
@@ -82,7 +91,7 @@ class MPLActor(AbstractActor):
         self.draw_line(start_coords, end_coords)
 
     def get_vertical_line_coords(self):
-        x, y = self.origin
+        x, y = self.coords
         middle_x = x + (self.width / 2.0)
         start_coords = middle_x, y
         end_coords = middle_x, y - self.line_height

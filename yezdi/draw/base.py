@@ -53,7 +53,7 @@ class AbstractDrawingKit(ABC):
     def create_rectangle(self, origin, width, height) -> AbstractRectangle:
         raise NotImplementedError
 
-    def create_actor(self, origin, width, height, line_height) -> AbstractActor:
+    def create_actor(self, coords, width, height, line_height) -> AbstractActor:
         raise NotImplementedError
 
     def create_horizontal_line(self, from_point, to_point) -> AbstractLine:

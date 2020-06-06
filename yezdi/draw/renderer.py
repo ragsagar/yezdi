@@ -11,12 +11,13 @@ class DrawingClient:
     participant_height = 20
     flow_line_gap = 15
     participant_gap = 20
+    max_actor_label_width = 10
+    space_for_character = 5
 
     def __init__(self, statements, drawing_kit: AbstractDrawingKit):
         self.statements = statements
         self.drawing_kit = drawing_kit
-        self.participant_coords = {}
-        self.drawn_participants = set()
+        self.participants = {}
         self.arrow_count = 0
         self.line_height = self.get_line_statement_count() * 30
         self.title_widget = None
@@ -51,26 +52,30 @@ class DrawingClient:
         self.draw_arrow(line)
 
     def draw_participant(self, participant):
-        if participant not in self.drawn_participants:
-            coords = self.get_coords_for_participant(participant)
+        if participant.name not in self.participants:
+            print(f"Drawing participant {participant.name}")
+            coords = self.get_next_participant_coords()
+            width = self.get_participant_width(participant)
+            width += self.get_extra_width_for_label(participant.name)
             actor = self.drawing_kit.create_actor(
-                coords,
-                self.participant_width,
-                self.participant_height,
-                self.line_height,
+                coords, width, self.participant_height, self.line_height,
             )
             actor.set_label(participant.name)
-            self.drawn_participants.add(participant)
+            self.participants[participant.name] = actor
 
     def get_coords_for_participant(self, participant):
-        participant_coords = self.participant_coords.get(participant.name)
-        if not participant_coords:
-            participant_coords = self.get_next_participant_coords()
-            self.participant_coords[participant.name] = participant_coords
-        return participant_coords
+        return self.participants[participant.name].coords
+        # participant_coords = self.participants.get(participant.name)
+        # if not participant_coords:
+        #     participant_coords = self.get_next_participant_coords()
+        #     self.participants[participant.name] = participant_coords
+        # return participant_coords
+
+    def get_extra_width_for_label(self, label):
+        return len(label[self.max_actor_label_width :]) * self.space_for_character
 
     def get_next_participant_coords(self):
-        length = len(self.participant_coords)
+        length = len(self.participants)
         y = self.origin[1]
         x = length * self.participant_width + (length + 1) * self.participant_gap
         return x, y
@@ -86,9 +91,15 @@ class DrawingClient:
 
     def get_arrow_coords(self, participant):
         x, y = self.get_coords_for_participant(participant)
-        x += self.participant_width / 2.0
+        x += self.get_participant_width(participant) / 2.0
         y -= self.flow_line_gap * self.arrow_count
         return x, y
+
+    def get_participant_width(self, participant):
+        if participant.name in self.participants:
+            return self.participants[participant.name].width
+        else:
+            return self.participant_width
 
     def interpret_title(self, title_statement):
         self.title_widget = self.drawing_kit.create_text(
