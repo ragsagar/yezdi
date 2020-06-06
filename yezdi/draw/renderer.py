@@ -13,18 +13,24 @@ class DrawingClient:
     participant_gap = 20
     max_actor_label_width = 10
     space_for_character = 5
+    min_line_height = 80
+    line_space = 20
 
     def __init__(self, statements, drawing_kit: AbstractDrawingKit):
         self.statements = statements
         self.drawing_kit = drawing_kit
         self.participants = {}
         self.arrow_count = 0
-        self.line_height = self.get_line_statement_count() * 30
+        self.line_height = self.get_line_height()
         self.title_widget = None
         self.arrow_creation_funcs = {
             LineType.SOLID: self.drawing_kit.create_solid_arrow,
             LineType.DASHED: self.drawing_kit.create_dashed_arrow,
         }
+
+    def get_line_height(self):
+        height = max(self.get_line_statement_count() * self.line_space, self.min_line_height)
+        return height
 
     def get_line_statement_count(self):
         return len(
@@ -65,11 +71,6 @@ class DrawingClient:
 
     def get_coords_for_participant(self, participant):
         return self.participants[participant.name].coords
-        # participant_coords = self.participants.get(participant.name)
-        # if not participant_coords:
-        #     participant_coords = self.get_next_participant_coords()
-        #     self.participants[participant.name] = participant_coords
-        # return participant_coords
 
     def get_extra_width_for_label(self, label):
         return len(label[self.max_actor_label_width :]) * self.space_for_character
