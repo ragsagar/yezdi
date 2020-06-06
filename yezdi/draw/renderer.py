@@ -1,26 +1,38 @@
 import pytest
 
-from yezdi.draw.mpl_engine import MPLEngine
-from yezdi.parser.ast import Participant, Title, LineStatement, LineType
-
-PARTICIPANT_WIDTH = 40
-PARTICIPANT_HEIGHT = 20
-DOWNSTROKE_HEIGHT = 100
-PARTICIPANT_GAP = 20
-EDGE_COLOR = "black"
-FILL_COLOR = "black"
-START_COORDS = (20, 200)
-FLOW_LINE_GAP = 15
+from yezdi.draw.base import AbstractDrawingKit
+from yezdi.parser.ast import Title, LineStatement, LineType, Statement
 
 
-class DrawingRenderer:
-    def __init__(self, statements):
+class DrawingClient:
+    title_coords = (300, 100)
+    origin = (20, 200)
+    participant_width = 40
+    participant_height = 20
+    flow_line_gap = 15
+    participant_gap = 20
+
+    def __init__(self, statements, drawing_kit: AbstractDrawingKit):
         self.statements = statements
-        self.engine = MPLEngine()
-        self.origin = START_COORDS
+        self.drawing_kit = drawing_kit
         self.participant_coords = {}
         self.drawn_participants = set()
         self.arrow_count = 0
+        self.line_height = self.get_line_statement_count() * 30
+        self.title_widget = None
+        self.arrow_creation_funcs = {
+            LineType.SOLID: self.drawing_kit.create_solid_arrow,
+            LineType.DASHED: self.drawing_kit.create_dashed_arrow,
+        }
+
+    def get_line_statement_count(self):
+        return len(
+            [
+                statement
+                for statement in self.statements
+                if isinstance(statement.root, LineStatement)
+            ]
+        )
 
     def interpret(self):
         for statement in self.statements:
@@ -41,11 +53,13 @@ class DrawingRenderer:
     def draw_participant(self, participant):
         if participant not in self.drawn_participants:
             coords = self.get_coords_for_participant(participant)
-            self.engine.add_rectangle(
-                coords, PARTICIPANT_WIDTH, PARTICIPANT_HEIGHT,
+            actor = self.drawing_kit.create_actor(
+                coords,
+                self.participant_width,
+                self.participant_height,
+                self.line_height,
             )
-            self.draw_down_stroke(coords)
-            self.add_participant_label(participant.name, coords)
+            actor.set_label(participant.name)
             self.drawn_participants.add(participant)
 
     def get_coords_for_participant(self, participant):
@@ -58,45 +72,34 @@ class DrawingRenderer:
     def get_next_participant_coords(self):
         length = len(self.participant_coords)
         y = self.origin[1]
-        x = length * PARTICIPANT_WIDTH + (length + 1) * PARTICIPANT_GAP
+        x = length * self.participant_width + (length + 1) * self.participant_gap
         return x, y
-
-    def draw_down_stroke(self, participant_coords):
-        px, py = participant_coords
-        middlex = px + (PARTICIPANT_WIDTH / 2.0)
-        start_coords = middlex, py
-        end_coords = middlex, py - DOWNSTROKE_HEIGHT
-        self.engine.add_dotted_line(start_coords, end_coords)
-
-    def add_participant_label(self, label, participant_coords):
-        x, y = participant_coords
-        tx = x + (PARTICIPANT_WIDTH / 2.0)
-        ty = y + (PARTICIPANT_HEIGHT / 2.0)
-        self.engine.add_text(label, (tx, ty))
 
     def draw_arrow(self, line):
         self.arrow_count += 1
-        sx, sy = self.get_coords_for_participant(line.source)
-        sx += PARTICIPANT_WIDTH / 2.0
-        sy -= FLOW_LINE_GAP * self.arrow_count
-        tx, ty = self.get_coords_for_participant(line.target)
-        tx += PARTICIPANT_WIDTH / 2.0
-        ty -= FLOW_LINE_GAP * self.arrow_count
-        self.engine.add_arrow((sx, sy), (tx, ty), line_type=line.type)
+        start = self.get_arrow_coords(line.source)
+        end = self.get_arrow_coords(line.target)
+        arrow_creation_func = self.arrow_creation_funcs.get(line.type)
+        arrow = arrow_creation_func(start, end)
         if line.info:
-            lx = sx + ((tx - sx) / 2.0)
-            ly = sy + ((ty - sy) / 2.0) + 1
-            self.engine.add_text(line.info, (lx, ly), ha="center")
+            arrow.set_info(line.info)
+
+    def get_arrow_coords(self, participant):
+        x, y = self.get_coords_for_participant(participant)
+        x += self.participant_width / 2.0
+        y -= self.flow_line_gap * self.arrow_count
+        return x, y
 
     def interpret_title(self, title_statement):
-        coords = (300, 100)
-        self.engine.add_text(title_statement, coords)
+        self.title_widget = self.drawing_kit.create_text(
+            self.title_coords, title_statement
+        )
 
     def get_rendering_object(self):
-        return self.engine.get_drawing_object()
+        return self.drawing_kit.get_drawing_object()
 
     def draw(self):
-        self.engine.prepare()
+        self.drawing_kit.prepare()
 
     def show(self):
-        self.engine.show()
+        self.drawing_kit.show()
