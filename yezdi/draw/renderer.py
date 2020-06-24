@@ -5,7 +5,7 @@ from yezdi.parser.ast import Title, LineStatement, LineType, Statement
 
 
 class DrawingClient:
-    title_coords = (300, 100)
+    title_coords = (50, 250)
     origin = (20, 200)
     participant_width = 40
     participant_height = 20
@@ -21,6 +21,7 @@ class DrawingClient:
         self.drawing_kit = drawing_kit
         self.participants = {}
         self.arrow_count = 0
+        self.arrows = []
         self.line_height = self.get_line_height()
         self.title_widget = None
         self.arrow_creation_funcs = {
@@ -29,7 +30,9 @@ class DrawingClient:
         }
 
     def get_line_height(self):
-        height = max(self.get_line_statement_count() * self.line_space, self.min_line_height)
+        height = max(
+            self.get_line_statement_count() * self.line_space, self.min_line_height
+        )
         return height
 
     def get_line_statement_count(self):
@@ -89,6 +92,7 @@ class DrawingClient:
         arrow = arrow_creation_func(start, end)
         if line.info:
             arrow.set_info(line.info)
+        self.arrows.append(arrow)
 
     def get_arrow_coords(self, participant):
         x, y = self.get_coords_for_participant(participant)
@@ -104,7 +108,7 @@ class DrawingClient:
 
     def interpret_title(self, title_statement):
         self.title_widget = self.drawing_kit.create_text(
-            self.title_coords, title_statement
+            self.title_coords, title_statement.value
         )
 
     def get_rendering_object(self):

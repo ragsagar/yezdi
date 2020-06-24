@@ -7,8 +7,8 @@ class AbstractActor:
     Rectangle with label and downstroke.
     """
 
-    def __init__(self, origin, width, height):
-        self.origin = origin
+    def __init__(self, coords, width, height):
+        self.coords = coords
         self.width = width
         self.height = height
 
@@ -20,6 +20,7 @@ class AbstractArrow:
     def __init__(self, from_point, to_point):
         self.from_point = from_point
         self.to_point = to_point
+        self.info = None
 
     def set_info(self, text):
         raise NotImplementedError
@@ -33,10 +34,6 @@ class AbstractText:
     def __init__(self, coords, label):
         self.coords = coords
         self.label = label
-        self._draw_text_widget()
-
-    def _draw_text_widget(self):
-        raise NotImplementedError
 
 
 class AbstractRectangle:

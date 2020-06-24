@@ -33,6 +33,9 @@ class MPLKit(AbstractDrawingKit):
     def create_dashed_arrow(self, from_point, to_point):
         return MPLDashedArrow(self.ax, from_point, to_point)
 
+    def create_text(self, coords, label) -> AbstractText:
+        return MPLText(self.ax, coords=coords, label=label)
+
     def get_drawing_object(self) -> Any:
         return self.figure
 
@@ -110,8 +113,9 @@ class MPLSolidArrow(AbstractArrow):
         self.ax = axes
         self.from_point = from_point
         self.to_point = to_point
+        self.info = None
         dx, dy = calculate_dx_dy(from_point, to_point)
-        logger.debug("Drawing arrow from %s to %s", from_point, to_point)
+        logger.info("Drawing %s from %s to %s", self, from_point, to_point)
         self.ax.arrow(
             *from_point,
             dx,
@@ -124,6 +128,7 @@ class MPLSolidArrow(AbstractArrow):
         )
 
     def set_info(self, text):
+        self.info = text
         x, y = self.get_coords_for_info()
         self.ax.text(x, y, text, ha="center", color="black")
 
@@ -141,13 +146,17 @@ class MPLDashedArrow(MPLSolidArrow):
 
 
 class MPLText(AbstractText):
-    def __init__(self, ax, *args, color="black", ha="center", **kwargs):
+    def __init__(self, ax, coords, label, *args, color="black", ha="center", **kwargs):
+        self.coords = coords
+        self.label = label
         self.ax = ax
         self.color = color
         self.ha = ha
-        super().__init__(*args, **kwargs)
+        self._draw_text_widget()
 
     def _draw_text_widget(self):
         logger.debug("Adding text %s at %s", self.label, self.coords)
+        print("Adding text %s at %s" % (self.label, self.coords))
         x, y = self.coords
         self.ax.text(x, y, self.label, ha=self.ha, color=self.color)
+
